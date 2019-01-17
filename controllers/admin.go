@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"beego-project/models"
+	"crypto/md5"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"io"
 )
 
 type AdminController struct {
@@ -41,7 +43,11 @@ func (this *AdminController) MemberAdd() {
 	id, _ := this.GetInt64("id")
 	name := this.GetString("name")
 	nickname := this.GetString("nickname")
+	w := md5.New()
 	password := this.GetString("password")
+	io.WriteString(w,password)
+	password = fmt.Sprintf("%x", w.Sum(nil))
+
 	is_show, _ := this.GetInt8("is_show")
 	level, _ := this.GetInt8("level")
 	pid, _ := this.GetInt64("pid")

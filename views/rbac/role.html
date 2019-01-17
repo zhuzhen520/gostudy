@@ -197,7 +197,6 @@ if(t == 0){
 }
 
 });
-
     $('#addDivBtn').click(function () {
         $('input[name="id"]').val("");
         $('button[type="reset"]').click();
@@ -252,7 +251,7 @@ table.render({
     elem: '#tableId'
     , url: '/RoleListJson'
     , cols: [[
-{field: 'Id', title: 'ID', sort: true}
+    {field: 'Id', title: 'ID', sort: true}
     , {field: 'Name', title: '角色名称'}
     , {field: 'Pid', title: '角色类型', templet: "#roleTpl"}
     , {field: 'Status', title: '是否启用', templet: "#enableTpl"}
@@ -290,7 +289,7 @@ if (data.Status == 0) {
     form.render("checkbox");
 }
 if (layEvent == "delete") {
-$.post('/RoleAdd', {"id": data.Id}, function (data) {
+$.post('/RoleDelete', {"id": data.Id}, function (data) {
     layer.msg("删除成功", {"icon": 1});
 table.reload('tableId', {});
 });
