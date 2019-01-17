@@ -1,0 +1,172 @@
+[[[template "public/head.html" .]]]
+<fieldset class="layui-elem-field">
+    <legend style="font-size: 13px">操作</legend>
+    <div class="layui-field-box">
+        <button class="layui-btn" id="addDivBtn">添加用户</button>
+    </div>
+</fieldset>
+
+<div style="display: none;padding: 10px;" id="addFormDiv">
+    <form class="layui-form" action="">
+        <input type="hidden" value="" name="id">
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" autocomplete="off" placeholder="请输入用户名"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">昵称</label>
+            <div class="layui-input-block">
+                <input type="text" name="nickname" autocomplete="off" placeholder="请输入用户名"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">登录密码</label>
+            <div class="layui-input-block">
+                <input type="text" name="password" autocomplete="off" placeholder="请输入登录密码"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Pid</label>
+            <div class="layui-input-block">
+                <input type="text" name="pid" autocomplete="off" placeholder="请输入父ID"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Level</label>
+            <div class="layui-input-block">
+                <input type="text" name="level" autocomplete="off" placeholder="请输level等级"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否启用</label>
+            <div class="layui-input-block">
+                <input type="checkbox" checked="" name="is_show" lay-skin="switch" lay-filter="switchTest"
+                       lay-text="ON|OFF">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="roleAddBtn">提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<table class="layui-hide" id="tableId" lay-filter="tableId"></table>
+
+<script type="text/html" id="operationTpl">
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete">删除</a>
+</script>
+
+<script type="text/html" id="enableTpl">
+{{# if (d.IsShow==0){ }}
+<a class="layui-btn layui-btn-primary layui-btn-xs">未启用</a>
+{{# } }}
+{{# if (d.IsShow==1){ }}
+<a class="layui-btn layui-btn-xs">已启用</a>
+{{# } }}
+</script>
+
+<script>
+layui.use(['form', 'table'], function () {
+    var table = layui.table;
+    var form = layui.form;
+    var $ = layui.jquery;
+    $('#addDivBtn').click(function () {
+        $('input[name="id"]').val("");
+        $('button[type="reset"]').click();
+        layer.open({
+            type: 1,
+            area: "500px",
+            title: "添加用户",
+            content: $('#addFormDiv')
+        });
+    });
+
+    //监听提交
+form.on('submit(roleAddBtn)', function (data) {
+
+if (typeof(data.field.is_show) == 'undefined') {
+    data.field.is_show = 0;
+} else {
+    data.field.is_show = 1;
+}
+
+    $.post('/MemberAdd', data.field, function (data) {
+
+        layer.msg(data.msg, {"icon": data.code ,"time": 2000},function () {
+            layer.closeAll();
+            window.location.reload();
+        });
+       // layer.closeAll();
+       // window.location.reload();
+    });
+    return false;
+});
+
+table.render({
+    elem: '#tableId'
+    , url: '/MemberListJson'
+    , cols: [[
+    {field: 'Id', title: 'ID', sort: true}
+    , {field: 'Name', title: '用户'}
+    , {field: 'Nickname', title: '昵称'}
+    , {field: 'Password', title: '密码'}
+    , {field: 'Level', title: '等级'}
+    , {field: 'Pid', title: '父ID'}
+    , {field: 'IsShow', title: '是否启用', templet: "#enableTpl"}
+    , {fixed: 'right', width: 160, toolbar: '#operationTpl'}
+]]
+    , page: true
+    , limit:10
+});
+
+table.on('tool(tableId)', function (obj) {
+    var data = obj.data;
+    var layEvent = obj.event;
+    var tr = obj.tr;
+
+if (layEvent == "edit") {
+    $('button[type="reset"]').click();
+    layer.open({
+        type: 1,
+        area: "500px",
+        title: "修改用户",
+        content: $('#addFormDiv')
+    });
+    $('input[name="id"]').val(data.Id);
+    $('input[name="name"]').val(data.Name);
+    $('input[name="nickname"]').val(data.Nickname);
+    $('input[name="password"]').val(data.Password);
+    $('input[name="level"]').val(data.Level);
+    $('input[name="pid"]').val(data.Pid);
+    if (data.IsShow == 0) {
+        $('input[name="is_show"]').attr('checked', false);
+    } else {
+        $('input[name="is_show"]').attr('checked', true);
+    }
+    form.render("select");
+    form.render("checkbox");
+}
+if (layEvent == "delete") {
+$.post('/MemberDelete', {"id": data.Id}, function (data) {
+    layer.msg(data.msg, {"icon": data.code,"time": 2000},function () {
+        layer.closeAll();
+        table.reload('tableId', {});
+    });
+
+})
+}
+});
+});
+</script>
+[[[template "public/foot.html" .]]]
