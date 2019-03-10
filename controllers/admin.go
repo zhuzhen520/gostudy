@@ -13,6 +13,7 @@ type AdminController struct {
 	beego.Controller
 }
 
+
 func (this *AdminController) JsonEncode(code int, msg string, data interface{}, count int) {
 	this.Data["json"] = map[string]interface{}{"code": code, "msg": msg, "data": data, "count": count}
 	this.ServeJSON()
@@ -46,7 +47,7 @@ func (this *AdminController) MemberAdd() {
 	w := md5.New()
 	password := this.GetString("password")
 	io.WriteString(w,password)
-	password = fmt.Sprintf("%x", w.Sum(nil))
+	password = fmt.Sprintf("%x", w.Sum(nil))//密码MD5加密
 
 	is_show, _ := this.GetInt8("is_show")
 	level, _ := this.GetInt8("level")
